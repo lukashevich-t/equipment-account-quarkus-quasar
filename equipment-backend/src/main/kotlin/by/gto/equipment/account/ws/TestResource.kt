@@ -5,11 +5,6 @@ import by.gto.equipment.account.mappers.GlobalMapper
 import by.gto.equipment.account.model.Action
 import by.gto.equipment.account.model.BaseReference
 import by.gto.equipment.account.model.Equipment
-import by.gto.equipment.account.model.EquipmentDescr
-import by.gto.equipment.account.model.JSONErrorCodesEnum
-import by.gto.equipment.account.model.JSONResponse
-import by.gto.equipment.account.model.ReferenceAnswerJSON
-import by.gto.equipment.account.service.ServiceImpl
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.enterprise.context.ApplicationScoped
@@ -25,14 +20,14 @@ private val TEST_GUID = "ea0fc72c-070f-4820-9d59-643f70fe0572".toGuidBytes()
 
 @ApplicationScoped
 @Path("t")
-open class TestResource {
+class TestResource {
     @Inject
     lateinit var mapper: GlobalMapper
 
     @POST
     @Path("logEquipmentChange")
     @Produces(MediaType.APPLICATION_JSON)
-    open fun logEquipmentChange(): Any {
+    fun logEquipmentChange(): Any {
         return mapper.logEquipmentChange(
                 TEST_GUID, Action.EQUIPMENT_CREATE.id,
                 1, "Create", LocalDateTime.now()
@@ -42,7 +37,7 @@ open class TestResource {
     @POST
     @Path("createReferences")
     @Produces(MediaType.APPLICATION_JSON)
-    open fun createReferences(): Any {
+    fun createReferences(): Any {
         val state = BaseReference(name = "state " + Math.random().toString())
         mapper.createReference("equipment_state", state)
         val type = BaseReference(name = "type " + Math.random().toString())
@@ -55,7 +50,7 @@ open class TestResource {
     @POST
     @Path("saveEquipment")
     @Produces(MediaType.APPLICATION_JSON)
-    open fun saveEquipment(): Any {
+    fun saveEquipment(): Any {
         val create = Math.random() >= 0.5
         val result = StringBuilder()
         val guid = if (create) {
@@ -74,7 +69,7 @@ open class TestResource {
     @GET
     @Path("loadEquipmentsByGuidList")
     @Produces(MediaType.APPLICATION_JSON)
-    open fun loadEquipmentsByGuidList(): Any {
+    fun loadEquipmentsByGuidList(): Any {
         return mapper.loadEquipmentsByGuidList(listOf(
                 TEST_GUID,
                 "1555973d-edb9-444c-a732-8a4944906c1a".toGuidBytes(),

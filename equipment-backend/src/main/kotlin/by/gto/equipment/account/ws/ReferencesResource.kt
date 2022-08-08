@@ -15,14 +15,14 @@ import javax.ws.rs.core.MediaType
 
 @ApplicationScoped
 @Path("r")
-open class ReferencesResource {
+class ReferencesResource {
     @Inject
     lateinit var service: ServiceImpl
 
     @GET
     @Path("eqStates")
     @Produces(MediaType.APPLICATION_JSON)
-    open fun getEquipmentStates() = try {
+    fun getEquipmentStates() = try {
         val eqs =
                 ReferenceAnswerJSON(LocalDateTime.now(), 0, service.loadEquipmentStates().values.toList())
         JSONResponse(JSONErrorCodesEnum.OK, null, eqs)
@@ -33,7 +33,7 @@ open class ReferencesResource {
     @GET
     @Path("eqTypes")
     @Produces(MediaType.APPLICATION_JSON)
-    open fun getEquipmentTypes() = try {
+    fun getEquipmentTypes() = try {
         val eqs = ReferenceAnswerJSON(LocalDateTime.now(), 0, service.loadEquipmentTypes().values.toList())
         JSONResponse(JSONErrorCodesEnum.OK, null, eqs)
     } catch (e: Exception) {
@@ -43,7 +43,7 @@ open class ReferencesResource {
     @GET
     @Path("persons")
     @Produces(MediaType.APPLICATION_JSON)
-    open fun getResponsiblePersons() = try {
+    fun getResponsiblePersons() = try {
         val eqs =
                 ReferenceAnswerJSON(LocalDateTime.now(), 0, service.loadResponsiblePersons().values.toList())
         JSONResponse(JSONErrorCodesEnum.OK, null, eqs)

@@ -8,7 +8,7 @@ import javax.enterprise.inject.spi.CDI
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpSession
 import javax.ws.rs.core.SecurityContext
-import org.jboss.logging.Logger;
+import org.jboss.logging.Logger
 
 var service: ServiceImpl = CDI.current().select(ServiceImpl::class.java).get()
 val log: Logger = Logger.getLogger("WSHelpers")
@@ -21,7 +21,7 @@ val log: Logger = Logger.getLogger("WSHelpers")
  * @param func - callback, выполняющий полезную работу
  * @return Обертка для ответа фронтенду. Несет полезную нагрузку, возвращенную callback-функцией func, или сообщение об ошибке
  */
-inline fun doSomethingWithUserInfo(sc: SecurityContext, rq: HttpServletRequest, func: (ui: UserInfo) -> Any): JSONResponse {
+inline fun doSomethingWithUserInfo(sc: SecurityContext, rq: HttpServletRequest, func: (ui: UserInfo) -> Any): JSONResponse<Any?> {
     return try {
         val ui = getCachedUserInfo(rq.session, sc.userPrincipal.name)
         val result = func(ui)

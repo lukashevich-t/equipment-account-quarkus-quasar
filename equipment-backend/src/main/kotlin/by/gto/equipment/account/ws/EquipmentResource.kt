@@ -36,15 +36,15 @@ import javax.ws.rs.core.SecurityContext
 @Path("eq")
 class EquipmentResource {
     @Inject
-    lateinit var service: ServiceImpl
+    private lateinit var service: ServiceImpl
 
     @GET
     @Path("getEqDescr")
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
-    fun loadEquipmentDescr(@QueryParam("guid") sGuid: String): JSONResponse {
+    fun loadEquipmentDescr(@QueryParam("guid") sGuid: String): JSONResponse<Any> {
         return try {
             val eq = service.loadEquipmentDescription(sGuid.toGuidBytes())
-                ?: return JSONResponse(JSONErrorCodesEnum.COMMON_USER_ERROR, "не найдено оборудование с таким guid")
+                    ?: return JSONResponse(JSONErrorCodesEnum.COMMON_USER_ERROR, "не найдено оборудование с таким guid")
             JSONResponse(JSONErrorCodesEnum.OK, null, eq)
         } catch (ex: Exception) {
             log.error(ex.message, ex)
@@ -55,39 +55,39 @@ class EquipmentResource {
     @GET
     @Path("getEqLog/{guid}")
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
-    fun getEquipmentLog(@PathParam("guid") sGuid: String): JSONResponse =
-        try {
-            UUID.fromString(sGuid)
-            JSONResponse(JSONErrorCodesEnum.OK, null, service.getLog(sGuid.toGuidBytes()))
-        } catch (ex: Exception) {
-            log.error(ex.message, ex)
-            JSONResponse(JSONErrorCodesEnum.COMMON_USER_ERROR, "неверный формат guid")
-        }
+    fun getEquipmentLog(@PathParam("guid") sGuid: String): JSONResponse<Any?> =
+            try {
+                UUID.fromString(sGuid)
+                JSONResponse(JSONErrorCodesEnum.OK, null, service.getLog(sGuid.toGuidBytes()))
+            } catch (ex: Exception) {
+                log.error(ex.message, ex)
+                JSONResponse(JSONErrorCodesEnum.COMMON_USER_ERROR, "неверный формат guid")
+            }
 
     @POST
     @Path("putEqDescr")
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     @Consumes(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     fun putEquipmentDescr(
-        @Context rq: HttpServletRequest,
-        @Context sc: SecurityContext,
-        eqdescr: EquipmentDescr?
-    ): JSONResponse {
+            @Context rq: HttpServletRequest,
+            @Context sc: SecurityContext,
+            eqdescr: EquipmentDescr?
+    ): JSONResponse<Any?> {
         if (eqdescr == null) {
             return JSONResponse(JSONErrorCodesEnum.COMMON_USER_ERROR, "Отсутствует входной параметр")
         }
-        val userId = service.getCachedUserInfo(rq.getSession(), sc.getUserPrincipal().getName()).id
-        try {
+        val userId = service.getCachedUserInfo(rq.session, sc.userPrincipal.name).id
+        return try {
             val (refsModified, newObj) = service.putEquipmentDescription(eqdescr, userId, true)
             // если были изменены справочники, то строка ответа начинается с пробела:
-            return JSONResponse(
-                JSONErrorCodesEnum.OK,
-                (if (refsModified as Boolean) " " else "") + "modified OK (guid ${eqdescr.guid})",
-                newObj
+            JSONResponse(
+                    JSONErrorCodesEnum.OK,
+                    (if (refsModified as Boolean) " " else "") + "modified OK (guid ${eqdescr.guid})",
+                    newObj
             )
         } catch (ex: Exception) {
             log.error(ex.message, ex)
-            return JSONResponse(JSONErrorCodesEnum.COMMON_SYSTEM_ERROR, ex.message)
+            JSONResponse(JSONErrorCodesEnum.COMMON_SYSTEM_ERROR, ex.message)
         }
     }
 
@@ -97,10 +97,10 @@ class EquipmentResource {
     //    @Consumes(MediaType.APPLICATION_FORM_URLENCODED + ";charset=UTF-8")
     @Consumes(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     fun updateEquipmentDescr(
-        @Context rq: HttpServletRequest,
-        @Context sc: SecurityContext,
-        eqdescr: EquipmentDescr?
-    ): JSONResponse {
+            @Context rq: HttpServletRequest,
+            @Context sc: SecurityContext,
+            eqdescr: EquipmentDescr?
+    ): JSONResponse<Any?> {
         if (eqdescr == null) {
             return JSONResponse(JSONErrorCodesEnum.COMMON_USER_ERROR, "Отсутствует входной параметр")
         }
@@ -108,13 +108,13 @@ class EquipmentResource {
         return try {
             // TODO: in production userId is mandatory
             val userId =
-                if (sc.userPrincipal == null) -1 else service.getCachedUserInfo(rq.session, sc.userPrincipal.name).id
+                    if (sc.userPrincipal == null) -1 else service.getCachedUserInfo(rq.session, sc.userPrincipal.name).id
             val (refsModified, newObj) = service.putEquipmentDescription(eqdescr, userId, false)
             // если были изменены справочники, то строка ответа начинается с пробела:
             JSONResponseExt(
-                JSONErrorCodesEnum.OK,
-                (if (refsModified as Boolean) " " else "") + "modified OK (guid ${eqdescr.guid})",
-                newObj, refsModified
+                    JSONErrorCodesEnum.OK,
+                    (if (refsModified as Boolean) " " else "") + "modified OK (guid ${eqdescr.guid})",
+                    newObj, refsModified
             )
         } catch (ex: Exception) {
             log.error(ex.message, ex)
@@ -126,12 +126,12 @@ class EquipmentResource {
     @Path("testdate")
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     fun getTestDate() =
-        JSONResponse(JSONErrorCodesEnum.OK, null, object {
-            val d = Date()
-            val ld = LocalDate.now()
-            val ldt = LocalDateTime.now()
-            val ms = System.currentTimeMillis()
-        })
+            JSONResponse<Map<String, Any>>(JSONErrorCodesEnum.OK, null, mapOf(
+                    "d" to Date(),
+                    "ld" to LocalDate.now(),
+                    "ldt" to LocalDateTime.now(),
+                    "ms" to System.currentTimeMillis()
+            ))
 
     @GET
     @Path("testlog")
@@ -142,18 +142,18 @@ class EquipmentResource {
     @Path("testsearch")
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     fun getTestSearch() = JSONResponse(
-        JSONErrorCodesEnum.OK,
-        "search",
-        service.searchEquipment(EquipmentSearchTemplate().apply { invNumber = "480699" })
+            JSONErrorCodesEnum.OK,
+            "search",
+            service.searchEquipment(EquipmentSearchTemplate().apply { invNumber = "480699" })
     )
 
     @GET
     @Path("testeq")
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
-    fun getTestEquipment(): JSONResponse {
+    fun getTestEquipment(): JSONResponse<Any> {
 
         val eq = service.loadEquipmentDescription(existingTestEqipment)
-            ?: return JSONResponse(JSONErrorCodesEnum.COMMON_USER_ERROR, "не найдено оборудование с таким guid")
+                ?: return JSONResponse(JSONErrorCodesEnum.COMMON_USER_ERROR, "не найдено оборудование с таким guid")
         return JSONResponse(JSONErrorCodesEnum.OK, null, eq)
     }
 
@@ -182,10 +182,10 @@ class EquipmentResource {
             baos.flush()
             baos.close()
             Response.ok(baos.toByteArray())
-                .header("Content-type", "application/pdf")
+                    .header("Content-type", "application/pdf")
 //                    .header("Content-Disposition", "attachment; filename=inv-numbers.pdf")
-                .header("Content-Transfer-Encoding", "binary")
-                .build()
+                    .header("Content-Transfer-Encoding", "binary")
+                    .build()
         } catch (ex: Exception) {
             ex.printStackTrace()
 //            StretchTypeEnum
@@ -199,9 +199,9 @@ class EquipmentResource {
     @Path("gen_inv")
     @Produces(MediaType.WILDCARD + ";charset=UTF-8")
     fun getInventoryNumbers2(
-        @QueryParam("date") sDate: String?,
-        @QueryParam("range") sRange: String,
-        @QueryParam("templateFilename") templateFilename: String?
+            @QueryParam("date") sDate: String?,
+            @QueryParam("range") sRange: String,
+            @QueryParam("templateFilename") templateFilename: String?
     ): Response {
         val baos = ByteArrayOutputStream()
 
@@ -212,8 +212,8 @@ class EquipmentResource {
             baos.flush()
             baos.close()
             Response.ok(baos.toByteArray())
-                .header("Content-type", "application/pdf")
-                .build()
+                    .header("Content-type", "application/pdf")
+                    .build()
         } catch (ex: Exception) {
             ex.printStackTrace()
             Response.serverError().entity(ex.message).status(Response.Status.INTERNAL_SERVER_ERROR).build()
@@ -226,27 +226,25 @@ class EquipmentResource {
     @Path("searchEq")
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     @Consumes(MediaType.APPLICATION_JSON + ";charset=UTF-8")
-    fun searchEquipment(eq: EquipmentSearchTemplate): JSONResponse {
-        try {
-            return JSONResponse(JSONErrorCodesEnum.OK, "search", service.searchEquipment(eq))
-        } catch (e: Exception) {
-            return JSONResponse(JSONErrorCodesEnum.COMMON_USER_ERROR, e.message, null)
-        }
-
-    }
+    fun searchEquipment(eq: EquipmentSearchTemplate): JSONResponse<Any> =
+            try {
+                JSONResponse(JSONErrorCodesEnum.OK, "search", service.searchEquipment(eq))
+            } catch (e: Exception) {
+                JSONResponse(JSONErrorCodesEnum.COMMON_USER_ERROR, e.message, null)
+            }
 
     @POST
     @Path("addLog")
     fun addLog(@Context rq: HttpServletRequest, @Context sc: SecurityContext, logEntry: LogEntry) = try {
         // TODO: in production userId is mandatory
         val userId =
-            if (sc.userPrincipal == null) -1 else service.getCachedUserInfo(rq.session, sc.userPrincipal.name).id
+                if (sc.userPrincipal == null) -1 else service.getCachedUserInfo(rq.session, sc.userPrincipal.name).id
         val result = service.logEquipmentChange(
-            logEntry.guid,
-            Action.fromId(logEntry.actionId),
-            userId,
-            logEntry.comment ?: "",
-            LocalDateTime.now()
+                logEntry.guid,
+                Action.fromId(logEntry.actionId),
+                userId,
+                logEntry.comment ?: "",
+                LocalDateTime.now()
         )
         JSONResponse(JSONErrorCodesEnum.OK, result.toString(), result)
     } catch (e: Exception) {

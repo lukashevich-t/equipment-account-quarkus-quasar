@@ -1,5 +1,5 @@
 package by.gto.equipment.account.model
 
-class JSONResponseExt(ec: JSONErrorCodesEnum, message: String? = null, content: Any? = null, refChanged: Boolean = false) : JSONResponse(ec, message, content) {
+class JSONResponseExt<T>(ec: JSONErrorCodesEnum, message: String? = null, content: T? = null, refChanged: Boolean = false) : JSONResponse<T>(ec, message, content) {
     val referencesChanged = refChanged
 }

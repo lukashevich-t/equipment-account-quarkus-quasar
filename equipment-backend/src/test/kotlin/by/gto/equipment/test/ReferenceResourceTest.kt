@@ -34,7 +34,7 @@ class ReferenceResourceTest {
     @Test
     @Throws(Throwable::class)
     fun testStatesEndpoint() {
-        val response = RestAssured.given().`when`().get("/r/eqStates")
+        val response = given().`when`().get("/r/eqStates")
         val vResponse: ValidatableResponse = response.then()
         vResponse.statusCode(Response.Status.OK.statusCode)
                 .contentType(MediaType.APPLICATION_JSON)
