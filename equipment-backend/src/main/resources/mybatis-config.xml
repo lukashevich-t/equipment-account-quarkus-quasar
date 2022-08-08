@@ -1,0 +1,35 @@
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+    <!--в данном блоке можно настроить много параметров. Полный список параметров http://mybatis.github.io/mybatis-3/configuration.html#settings-->
+    <!--    <settings>
+            <setting name="logImpl" value="LOG4J"/>
+        </settings>-->
+
+    <!--<typeAliases>
+        <typeAlias type="by.gto.erip.model2.json.UserMessage" alias="UserMessage"/>
+    </typeAliases>-->
+
+    <typeHandlers>
+        <typeHandler handler="org.apache.ibatis.type.ByteArrayTypeHandler"/>
+        <!-- <typeHandler handler="org.apache.ibatis.type.LocalDateTypeHandler" />-->
+        <!-- <package name="io.quarkiverse.it.mybatis"/>-->
+    </typeHandlers>
+
+    <!-- setup environment with Quarkus data source -->
+    <environments default="development">
+        <environment id="development">
+            <transactionManager type="JDBC"/> <!--MANAGED-->
+            <dataSource type="QUARKUS">
+                <!-- <property name="db" value="h2"/>-->
+            </dataSource>
+        </environment>
+    </environments>
+
+<!--    <mappers>-->
+<!--         <mapper resource="by/gto/erip/dao/mybatis/mappers/PaymentMappers.xml"/>-->
+<!--        <package name="org.acme.mybatis"/>-->
+<!--    </mappers>-->
+</configuration>
