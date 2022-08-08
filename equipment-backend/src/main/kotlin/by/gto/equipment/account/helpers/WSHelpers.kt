@@ -1,6 +1,5 @@
 package by.gto.equipment.account.helpers
 
-import by.gto.equipment.account.model.JSONErrorCodesEnum
 import by.gto.equipment.account.model.JSONResponse
 import by.gto.equipment.account.model.UserInfo
 import by.gto.equipment.account.service.ServiceImpl
@@ -9,6 +8,8 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpSession
 import javax.ws.rs.core.SecurityContext
 import org.jboss.logging.Logger
+import by.gto.equipment.account.model.JSONResponse.Companion.CODE_COMMON_SYSTEM_ERROR
+import by.gto.equipment.account.model.JSONResponse.Companion.CODE_OK
 
 var service: ServiceImpl = CDI.current().select(ServiceImpl::class.java).get()
 val log: Logger = Logger.getLogger("WSHelpers")
@@ -25,10 +26,10 @@ inline fun doSomethingWithUserInfo(sc: SecurityContext, rq: HttpServletRequest, 
     return try {
         val ui = getCachedUserInfo(rq.session, sc.userPrincipal.name)
         val result = func(ui)
-        JSONResponse(JSONErrorCodesEnum.OK, "", result)
+        JSONResponse(CODE_OK, "", result)
     } catch (ex: Exception) {
         log.error(ex.message, ex)
-        JSONResponse(JSONErrorCodesEnum.COMMON_SYSTEM_ERROR, ex.message)
+        JSONResponse(CODE_COMMON_SYSTEM_ERROR, ex.message)
     }
 }
 

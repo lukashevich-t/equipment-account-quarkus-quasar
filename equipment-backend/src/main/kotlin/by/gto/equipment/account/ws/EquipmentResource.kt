@@ -4,7 +4,6 @@ import by.gto.equipment.account.helpers.toGuidBytes
 import by.gto.equipment.account.model.Action
 import by.gto.equipment.account.model.EquipmentDescr
 import by.gto.equipment.account.model.EquipmentSearchTemplate
-import by.gto.equipment.account.model.JSONErrorCodesEnum
 import by.gto.equipment.account.model.JSONResponse
 import by.gto.equipment.account.model.JSONResponseExt
 import by.gto.equipment.account.model.LogEntry
@@ -31,6 +30,9 @@ import javax.ws.rs.core.Context
 import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.Response
 import javax.ws.rs.core.SecurityContext
+import by.gto.equipment.account.model.JSONResponse.Companion.CODE_COMMON_SYSTEM_ERROR
+import by.gto.equipment.account.model.JSONResponse.Companion.CODE_OK
+import by.gto.equipment.account.model.JSONResponse.Companion.CODE_COMMON_USER_ERROR
 
 @ApplicationScoped
 @Path("eq")
@@ -44,11 +46,11 @@ class EquipmentResource {
     fun loadEquipmentDescr(@QueryParam("guid") sGuid: String): JSONResponse<Any> {
         return try {
             val eq = service.loadEquipmentDescription(sGuid.toGuidBytes())
-                    ?: return JSONResponse(JSONErrorCodesEnum.COMMON_USER_ERROR, "не найдено оборудование с таким guid")
-            JSONResponse(JSONErrorCodesEnum.OK, null, eq)
+                    ?: return JSONResponse(CODE_COMMON_USER_ERROR, "не найдено оборудование с таким guid")
+            JSONResponse(CODE_OK, null, eq)
         } catch (ex: Exception) {
             log.error(ex.message, ex)
-            JSONResponse(JSONErrorCodesEnum.COMMON_USER_ERROR, "неверный формат guid")
+            JSONResponse(CODE_COMMON_USER_ERROR, "неверный формат guid")
         }
     }
 
@@ -58,10 +60,10 @@ class EquipmentResource {
     fun getEquipmentLog(@PathParam("guid") sGuid: String): JSONResponse<Any?> =
             try {
                 UUID.fromString(sGuid)
-                JSONResponse(JSONErrorCodesEnum.OK, null, service.getLog(sGuid.toGuidBytes()))
+                JSONResponse(CODE_OK, null, service.getLog(sGuid.toGuidBytes()))
             } catch (ex: Exception) {
                 log.error(ex.message, ex)
-                JSONResponse(JSONErrorCodesEnum.COMMON_USER_ERROR, "неверный формат guid")
+                JSONResponse(CODE_COMMON_USER_ERROR, "неверный формат guid")
             }
 
     @POST
@@ -74,20 +76,20 @@ class EquipmentResource {
             eqdescr: EquipmentDescr?
     ): JSONResponse<Any?> {
         if (eqdescr == null) {
-            return JSONResponse(JSONErrorCodesEnum.COMMON_USER_ERROR, "Отсутствует входной параметр")
+            return JSONResponse(CODE_COMMON_USER_ERROR, "Отсутствует входной параметр")
         }
         val userId = service.getCachedUserInfo(rq.session, sc.userPrincipal.name).id
         return try {
             val (refsModified, newObj) = service.putEquipmentDescription(eqdescr, userId, true)
             // если были изменены справочники, то строка ответа начинается с пробела:
             JSONResponse(
-                    JSONErrorCodesEnum.OK,
+                    CODE_OK,
                     (if (refsModified as Boolean) " " else "") + "modified OK (guid ${eqdescr.guid})",
                     newObj
             )
         } catch (ex: Exception) {
             log.error(ex.message, ex)
-            JSONResponse(JSONErrorCodesEnum.COMMON_SYSTEM_ERROR, ex.message)
+            JSONResponse(CODE_COMMON_SYSTEM_ERROR, ex.message)
         }
     }
 
@@ -102,7 +104,7 @@ class EquipmentResource {
             eqdescr: EquipmentDescr?
     ): JSONResponse<Any?> {
         if (eqdescr == null) {
-            return JSONResponse(JSONErrorCodesEnum.COMMON_USER_ERROR, "Отсутствует входной параметр")
+            return JSONResponse(CODE_COMMON_USER_ERROR, "Отсутствует входной параметр")
         }
 
         return try {
@@ -112,13 +114,13 @@ class EquipmentResource {
             val (refsModified, newObj) = service.putEquipmentDescription(eqdescr, userId, false)
             // если были изменены справочники, то строка ответа начинается с пробела:
             JSONResponseExt(
-                    JSONErrorCodesEnum.OK,
+                    CODE_OK,
                     (if (refsModified as Boolean) " " else "") + "modified OK (guid ${eqdescr.guid})",
                     newObj, refsModified
             )
         } catch (ex: Exception) {
             log.error(ex.message, ex)
-            JSONResponse(JSONErrorCodesEnum.COMMON_SYSTEM_ERROR, ex.message)
+            JSONResponse(CODE_COMMON_SYSTEM_ERROR, ex.message)
         }
     }
 
@@ -126,7 +128,7 @@ class EquipmentResource {
     @Path("testdate")
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     fun getTestDate() =
-            JSONResponse<Map<String, Any>>(JSONErrorCodesEnum.OK, null, mapOf(
+            JSONResponse<Map<String, Any>>(CODE_OK, null, mapOf(
                     "d" to Date(),
                     "ld" to LocalDate.now(),
                     "ldt" to LocalDateTime.now(),
@@ -136,13 +138,13 @@ class EquipmentResource {
     @GET
     @Path("testlog")
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
-    fun getTestLog() = JSONResponse(JSONErrorCodesEnum.OK, null, service.getLog(existingTestEqipment))
+    fun getTestLog() = JSONResponse(CODE_OK, null, service.getLog(existingTestEqipment))
 
     @GET
     @Path("testsearch")
     @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     fun getTestSearch() = JSONResponse(
-            JSONErrorCodesEnum.OK,
+            CODE_OK,
             "search",
             service.searchEquipment(EquipmentSearchTemplate().apply { invNumber = "480699" })
     )
@@ -153,8 +155,8 @@ class EquipmentResource {
     fun getTestEquipment(): JSONResponse<Any> {
 
         val eq = service.loadEquipmentDescription(existingTestEqipment)
-                ?: return JSONResponse(JSONErrorCodesEnum.COMMON_USER_ERROR, "не найдено оборудование с таким guid")
-        return JSONResponse(JSONErrorCodesEnum.OK, null, eq)
+                ?: return JSONResponse(CODE_COMMON_USER_ERROR, "не найдено оборудование с таким guid")
+        return JSONResponse(CODE_OK, null, eq)
     }
 
     companion object {
@@ -167,7 +169,7 @@ class EquipmentResource {
      */
     @GET
     @Path("guid")
-    fun genGuid() = JSONResponse(JSONErrorCodesEnum.OK, content = UUID.randomUUID().toString())
+    fun genGuid() = JSONResponse(CODE_OK, content = UUID.randomUUID().toString())
 
     @POST
     @Path("print_invs2")
@@ -228,9 +230,9 @@ class EquipmentResource {
     @Consumes(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     fun searchEquipment(eq: EquipmentSearchTemplate): JSONResponse<Any> =
             try {
-                JSONResponse(JSONErrorCodesEnum.OK, "search", service.searchEquipment(eq))
+                JSONResponse(CODE_OK, "search", service.searchEquipment(eq))
             } catch (e: Exception) {
-                JSONResponse(JSONErrorCodesEnum.COMMON_USER_ERROR, e.message, null)
+                JSONResponse(CODE_COMMON_USER_ERROR, e.message, null)
             }
 
     @POST
@@ -246,9 +248,9 @@ class EquipmentResource {
                 logEntry.comment ?: "",
                 LocalDateTime.now()
         )
-        JSONResponse(JSONErrorCodesEnum.OK, result.toString(), result)
+        JSONResponse(CODE_OK, result.toString(), result)
     } catch (e: Exception) {
-        JSONResponse(JSONErrorCodesEnum.COMMON_USER_ERROR, e.message, null)
+        JSONResponse(CODE_COMMON_USER_ERROR, e.message, null)
     }
 
     @PostConstruct
