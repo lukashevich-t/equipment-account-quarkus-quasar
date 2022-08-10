@@ -196,7 +196,7 @@ class EquipmentResource {
     @Test
     fun сохранениеЗаписиССуществующимGUIDЗавершитсяОшибкой() {
         val newEntry = EquipmentDescr(sampleEquipmentDescr).apply { guid = EXISTING_GUID.toGuidBytes() }
-        val answer = given().contentType(APPLICATION_JSON).body(serialize(newEntry))
+        val answer = given().contentType(APPLICATION_JSON).body(newEntry)
                 .`when`().log().all().post("eq/putEqDescr")
                 .then().log().all()
                 .statusCode(Response.Status.BAD_REQUEST.statusCode)
@@ -221,7 +221,7 @@ class EquipmentResource {
                 state = testCase.state
                 person = testCase.person
             }
-            val answer = given().contentType(APPLICATION_JSON).body(serialize(newEntry))
+            val answer = given().contentType(APPLICATION_JSON).body(newEntry)
                     .`when`().log().all().post("eq/putEqDescr")
                     .then().log().all()
                     .statusCode(Response.Status.CREATED.statusCode)
@@ -251,7 +251,7 @@ class EquipmentResource {
             guid = EXISTING_GUID.toGuidBytes()
             type = newEquipmentType
         }
-        val answer = given().contentType(APPLICATION_JSON).body(serialize(newEntry))
+        val answer = given().contentType(APPLICATION_JSON).body(newEntry)
                 .`when`().log().all().post("eq/updateEqDescr")
                 .then().log().all()
                 .statusCode(Response.Status.OK.statusCode)
@@ -283,7 +283,7 @@ class EquipmentResource {
             guid = UUID.randomUUID().toBytes()
             person = newPerson
         }
-        val answer = given().contentType(APPLICATION_JSON).body(serialize(newEntry))
+        val answer = given().contentType(APPLICATION_JSON).body(newEntry)
                 .`when`().log().all().post("eq/updateEqDescr")
                 .then().log().all()
                 .statusCode(Response.Status.CREATED.statusCode)
