@@ -8,8 +8,12 @@
             <setting name="logImpl" value="LOG4J"/>
         </settings>-->
 
-    <!--<typeAliases>
-        <typeAlias type="by.gto.erip.model2.json.UserMessage" alias="UserMessage"/>
+<!--    псевдонимы почему-то не работают (в виде аннотаций-тоже)-->
+<!--    <typeAliases>
+        <typeAlias type="by.gto.equipment.account.model.Equipment" alias="Equipment"/>
+        <typeAlias type="by.gto.equipment.account.model.EquipmentDescr" alias="EquipmentDescr"/>
+        <typeAlias type="by.gto.equipment.account.model.LogEntryPresentation" alias="LogEntryPresentation"/>
+        <package name="by.gto.equipment.account.model"/>
     </typeAliases>-->
 
     <typeHandlers>
@@ -28,8 +32,9 @@
         </environment>
     </environments>
 
-<!--    <mappers>-->
+    <mappers>
 <!--         <mapper resource="by/gto/erip/dao/mybatis/mappers/PaymentMappers.xml"/>-->
-<!--        <package name="org.acme.mybatis"/>-->
-<!--    </mappers>-->
+<!--         <mapper resource="by/gto/equipment/account/mappers/GlobalMapper.xml"/>-->
+<!--        <package name="by.gto.equipment.account.mappers"/>-->
+    </mappers>
 </configuration>

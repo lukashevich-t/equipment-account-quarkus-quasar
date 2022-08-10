@@ -20,13 +20,18 @@
         INSERT INTO equipment(id, type_id, person_id, state_id, comment, inv_number, purchase_date, serial)
         VALUES (#{eq.guid}, #{eq.typeId}, #{eq.personId}, #{eq.stateId}, #{eq.comment}, #{eq.invNumber},
                 #{eq.purchaseDate}, #{eq.serial})
-        ON DUPLICATE KEY UPDATE type_id    = VALUES(equipment.type_id),
-                                person_id  = VALUES(equipment.person_id),
-                                state_id   = VALUES(equipment.state_id),
-                                comment    = VALUES(equipment.comment),
-                                inv_number = VALUES(equipment.inv_number),
-                                serial     = VALUES(equipment.serial)
     </insert>
+
+    <update id="updateEquipment" parameterType="by.gto.equipment.account.model.Equipment">
+        UPDATE equipment
+        set type_id    = #{eq.typeId},
+            person_id  = #{eq.personId},
+            state_id   = #{eq.stateId},
+            comment    = #{eq.comment},
+            inv_number = #{eq.invNumber},
+            serial     = #{eq.serial}
+        where id = #{eq.guid}
+    </update>
 
     <select id="loadEquipmentsByGuidList" resultType="by.gto.equipment.account.model.Equipment">
         SELECT e.id guid,
@@ -39,7 +44,7 @@
         e.serial
         FROM equipment e
         WHERE e.id in (
-        <foreach collection="guids" item="guid" separator="," >#{guid}</foreach>
+        <foreach collection="guids" item="guid" separator=",">#{guid}</foreach>
         )
     </select>
 
@@ -115,5 +120,17 @@
                  LEFT JOIN user u ON (l.user_id = u.id)
         WHERE l.equipment_id = #{guid}
         order by l.`time` desc
+    </select>
+
+    <select id="loadResponsiblePersons" resultType="by.gto.equipment.account.model.BaseReference">
+        SELECT rp.id, rp.name FROM responsible_person rp order by rp.name
+    </select>
+
+    <select id="loadEquipmentTypes" resultType="by.gto.equipment.account.model.BaseReference">
+        SELECT et.id, et.name FROM equipment_type et order by et.name
+    </select>
+
+    <select id="loadEquipmentStates" resultType="by.gto.equipment.account.model.BaseReference">
+        SELECT es.id, es.name FROM equipment_state es order by es.name
     </select>
 </mapper>

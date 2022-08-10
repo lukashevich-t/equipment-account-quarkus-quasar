@@ -6,11 +6,14 @@ import by.gto.equipment.account.helpers.toGuid
 import by.gto.equipment.account.helpers.toGuidBytes
 import by.gto.equipment.account.model.Action
 import by.gto.equipment.account.model.BaseReference
+import by.gto.equipment.account.model.EQUIPMENT_ALREADY_EXISTS_MESSAGE
 import by.gto.equipment.account.model.EquipmentDescr
 import by.gto.equipment.account.model.EquipmentSearchTemplate
 import by.gto.equipment.account.model.InvNumberQR
-import by.gto.equipment.account.model.LogEntries
 import by.gto.equipment.account.model.QR_SIZE
+import by.gto.equipment.account.model.REF_EQUIPMENT_STATES_TABLE_NAME
+import by.gto.equipment.account.model.REF_EQUIPMENT_TYPES_TABLE_NAME
+import by.gto.equipment.account.model.REF_PERSONS_TABLE_NAME
 import by.gto.equipment.account.model.UserInfo
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
@@ -33,8 +36,11 @@ import java.util.UUID
 import java.util.regex.Pattern
 import javax.enterprise.context.ApplicationScoped
 import javax.inject.Inject
+import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpSession
 import javax.transaction.Transactional
+import javax.ws.rs.core.Context
+import javax.ws.rs.core.SecurityContext
 
 @ApplicationScoped
 class ServiceImpl {
@@ -62,7 +68,7 @@ class ServiceImpl {
     }
 
     @Throws(SQLException::class)
-     fun loadResponsiblePersons(): Map<Int, BaseReference> {
+    fun loadResponsiblePersons(): Map<Int, BaseReference> {
         var r = persons
         if (r == null) {
             r = mapper.loadResponsiblePersons().associateBy({ it.id }, { it })
@@ -203,36 +209,46 @@ class ServiceImpl {
 //        return refEntry.id
 //    }
 
+    /**
+     * @return тройка значений. Первое - описание созданной или обновлённой записи оборудования.
+     * Второе - признак, что во время создания/обновления оборудования были модифицированы справочники.
+     * Третье - признак, что была создана новая запись, а не обновлена существующая
+     */
     @Transactional(rollbackOn = [Exception::class])
     @Throws(Exception::class)
-    fun putEquipmentDescription(eqDescription: EquipmentDescr, userId: Int, failIfExists: Boolean): Array<Any?> {
+    fun putEquipmentDescription(
+        eqDescription: EquipmentDescr,
+        userId: Int,
+        failIfExists: Boolean
+    ): Triple<EquipmentDescr, Boolean, Boolean> {
         val oldEquipment = mapper.loadEquipmentDescr(eqDescription.guid)
 
+        val created = oldEquipment == null
         if (oldEquipment != null && failIfExists) {
-            throw Exception("Такой guid уже зарегистрирован")
+            throw Exception(EQUIPMENT_ALREADY_EXISTS_MESSAGE)
         }
 
-        var typeId = mapper.getRefIdByName("equipment_type", eqDescription.type!!)
-        var stateId = mapper.getRefIdByName("equipment_state", eqDescription.state!!)
-        var personId = mapper.getRefIdByName("responsible_person", eqDescription.person!!)
-        var refsModified: Boolean? = false
+        var typeId = mapper.getRefIdByName(REF_EQUIPMENT_TYPES_TABLE_NAME, eqDescription.type!!)
+        var stateId = mapper.getRefIdByName(REF_EQUIPMENT_STATES_TABLE_NAME, eqDescription.state!!)
+        var personId = mapper.getRefIdByName(REF_PERSONS_TABLE_NAME, eqDescription.person!!)
+        var refsModified = false
         if (typeId == null || typeId <= 0) {
             val refEntry = BaseReference(name = eqDescription.type!!)
-            mapper.createReference("equipment_type", refEntry)
+            mapper.createReference(REF_EQUIPMENT_TYPES_TABLE_NAME, refEntry)
             typeId = refEntry.id
             eqTypes = null
             refsModified = true
         }
         if (stateId == null || stateId <= 0) {
             val refEntry = BaseReference(name = eqDescription.state!!)
-            mapper.createReference("equipment_state", refEntry)
+            mapper.createReference(REF_EQUIPMENT_STATES_TABLE_NAME, refEntry)
             stateId = refEntry.id
             eqStates = null
             refsModified = true
         }
         if (personId == null || personId <= 0) {
             val refEntry = BaseReference(name = eqDescription.person!!)
-            mapper.createReference("responsible_person", refEntry)
+            mapper.createReference(REF_PERSONS_TABLE_NAME, refEntry)
             personId = refEntry.id
             persons = null
             refsModified = true
@@ -241,7 +257,11 @@ class ServiceImpl {
         eqDescription.personId = personId
         eqDescription.stateId = stateId
         eqDescription.typeId = typeId
-        mapper.saveEquipment(eqDescription)
+        if (created) {
+            mapper.saveEquipment(eqDescription)
+        } else {
+            mapper.updateEquipment(eqDescription)
+        }
         val action: Action
         val comment = if (oldEquipment != null) {
             action = Action.EQUIPMENT_MODIFY
@@ -250,13 +270,13 @@ class ServiceImpl {
             action = Action.EQUIPMENT_CREATE
             eqDescription.toString()
         }
-        mapper.logEquipmentChange(eqDescription.guid, action.id, userId, comment?:"", LocalDateTime.now())
-        return arrayOf(refsModified, eqDescription)
+        mapper.logEquipmentChange(eqDescription.guid, action.id, userId, comment, LocalDateTime.now())
+        return Triple(eqDescription, refsModified, created)
     }
 
 
     fun loadUserInfo(login: String): UserInfo {
-        val userInfoByLogin = if(login.lowercase().startsWith("cn=")) {
+        val userInfoByLogin = if (login.lowercase().startsWith("cn=")) {
             mapper.loadUserInfoByDn(login)
         } else {
             mapper.loadUserInfoByLogin(login)
@@ -271,22 +291,36 @@ class ServiceImpl {
 
     // TODO: done before this comment
 
-    fun getLog(guid: ByteArray) = LogEntries(mapper.getLog(guid))
+    fun getLog(guid: ByteArray) = mapper.getLog(guid)
 
-    fun getCachedUserInfo(session: HttpSession, userLogin: String?): UserInfo {
-        if (userLogin == null) return UserInfo()
-        var result: UserInfo? = session.getAttribute(userLogin + "_userinfo") as UserInfo?
-        if (null == result) {
-            result = loadUserInfo(userLogin)
-            session.setAttribute(userLogin + "_userinfo", result)
+    fun getCachedUserInfo(rq: HttpServletRequest, sc: SecurityContext): UserInfo {
+        return UserInfo().apply {
+            id = 1
         }
-        return result
+//        val userLogin = sc.userPrincipal.name
+//        val session= rq.session
+//        if (userLogin == null) return UserInfo()
+//        var result: UserInfo? = session.getAttribute(userLogin + "_userinfo") as UserInfo?
+//        if (null == result) {
+//            result = loadUserInfo(userLogin)
+//            session.setAttribute(userLogin + "_userinfo", result)
+//        }
+//        return result
     }
+
+//    fun getCachedUserInfo(session: HttpSession, userLogin: String?): UserInfo {
+//        if (userLogin == null) return UserInfo()
+//        var result: UserInfo? = session.getAttribute(userLogin + "_userinfo") as UserInfo?
+//        if (null == result) {
+//            result = loadUserInfo(userLogin)
+//            session.setAttribute(userLogin + "_userinfo", result)
+//        }
+//        return result
+//    }
 
     companion object {
         private val patternRange = Pattern.compile("^\\s*(\\d+)\\s*-\\s*(\\d+)\\s*$")
         private val patternMultiply = Pattern.compile("^\\s*([^*]+)\\*\\s*(\\d+)\\s*$")
-
 
 
         private var persons: Map<Int, BaseReference>? = null

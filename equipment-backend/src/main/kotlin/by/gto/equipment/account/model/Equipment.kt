@@ -2,11 +2,12 @@ package by.gto.equipment.account.model
 
 import by.gto.equipment.account.helpers.JsonGuidDeserializer
 import by.gto.equipment.account.helpers.JsonGuidSerializer
+import by.gto.equipment.account.helpers.JsonLocalDateDeserializer
+import by.gto.equipment.account.helpers.JsonLocalDateSerializer
 import by.gto.equipment.account.helpers.toGuidString
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
-import org.jetbrains.annotations.NotNull
 import java.time.LocalDate
 import java.util.Objects
 
@@ -21,6 +22,9 @@ open class Equipment : Cloneable {
     var comment: String? = null
     var invNumber: String = ""
     var serial: String? = null
+
+    @JsonSerialize(using = JsonLocalDateSerializer::class)
+    @JsonDeserialize(using = JsonLocalDateDeserializer::class)
     var purchaseDate: LocalDate? = null
 
     constructor(
@@ -63,7 +67,7 @@ open class Equipment : Cloneable {
         return "Equipment(guid=${guid.toGuidString()}, typeId=$typeId, personId=$personId, stateId=$stateId, comment=$comment, invNumber=$invNumber, serial=$serial, purchaseDate=$purchaseDate)"
     }
 
-    open fun diff(old: Equipment): String? {
+    open fun diff(old: Equipment): String {
         val sb = StringBuilder(128)
         if (old.typeId != this.typeId) {
             sb.append("typeId ").append(old.typeId).append(" -> ").append(this.typeId).append("\n")
@@ -86,6 +90,38 @@ open class Equipment : Cloneable {
         if (Objects.equals(old.purchaseDate, this.purchaseDate)) {
             sb.append("purchaseDate ").append(old.purchaseDate).append(" -> ").append(this.purchaseDate).append("\n")
         }
-        return if (sb.isEmpty()) null else sb.toString()
+        return sb.toString()
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Equipment
+
+        if (!guid.contentEquals(other.guid)) return false
+        if (typeId != other.typeId) return false
+        if (personId != other.personId) return false
+        if (stateId != other.stateId) return false
+        if (comment != other.comment) return false
+        if (invNumber != other.invNumber) return false
+        if (serial != other.serial) return false
+        if (purchaseDate != other.purchaseDate) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = guid.contentHashCode()
+        result = 31 * result + typeId
+        result = 31 * result + personId
+        result = 31 * result + stateId
+        result = 31 * result + (comment?.hashCode() ?: 0)
+        result = 31 * result + invNumber.hashCode()
+        result = 31 * result + (serial?.hashCode() ?: 0)
+        result = 31 * result + (purchaseDate?.hashCode() ?: 0)
+        return result
+    }
+
+
 }

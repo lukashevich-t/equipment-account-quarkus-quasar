@@ -9,18 +9,39 @@ import java.time.LocalDateTime
 /**
  * Класс для хранения описания изменении состояния оборудования
  */
-class LogEntryPresentation {
+public open class LogEntryPresentation {
     @JsonSerialize(using = JsonGuidSerializer::class)
     @JsonDeserialize(using = JsonGuidDeserializer::class)
-    val guid: ByteArray = DEFAULT_GUID
-    val actionName: String? = null
-    val userName: String = ""
-    val time: LocalDateTime = LocalDateTime.MIN
-    val comment: String? = null
+    var guid: ByteArray = DEFAULT_GUID
+    var actionName: String? = null
+    var userName: String = ""
+    var time: LocalDateTime = LocalDateTime.MIN
+    var comment: String? = null
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as LogEntryPresentation
+
+        if (!guid.contentEquals(other.guid)) return false
+        if (actionName != other.actionName) return false
+        if (userName != other.userName) return false
+        if (time != other.time) return false
+        if (comment != other.comment) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = guid.contentHashCode()
+        result = 31 * result + (actionName?.hashCode() ?: 0)
+        result = 31 * result + userName.hashCode()
+        result = 31 * result + time.hashCode()
+        result = 31 * result + (comment?.hashCode() ?: 0)
+        return result
+    }
 
 }
-
-data class LogEntries(var entries: List<LogEntryPresentation> = emptyList())
 
 /**
  * Класс для записи информации об изменении состояния оборудования в БД

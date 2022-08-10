@@ -3,6 +3,9 @@ package by.gto.equipment.account.mappers
 import by.gto.equipment.account.model.Equipment
 import by.gto.equipment.account.model.EquipmentDescr
 import by.gto.equipment.account.model.EquipmentSearchTemplate
+import by.gto.equipment.account.model.REF_EQUIPMENT_STATES_TABLE_NAME
+import by.gto.equipment.account.model.REF_EQUIPMENT_TYPES_TABLE_NAME
+import by.gto.equipment.account.model.REF_PERSONS_TABLE_NAME
 import java.lang.StringBuilder
 import java.util.UUID
 
@@ -10,9 +13,9 @@ class SQLProviders {
     fun searchEquipment(template: EquipmentSearchTemplate): String {
         val header = "SELECT e.id, e.type_id, e.person_id, e.state_id, e.comment, e.inv_number, e.purchase_date, " +
                 "e.serial, es.name AS state, et.name AS eq_type, rp.name AS person FROM equipment e\n" +
-                "  LEFT JOIN responsible_person rp ON e.person_id = rp.id\n" +
-                "  LEFT JOIN equipment_state es ON e.state_id = es.id\n" +
-                "  LEFT JOIN equipment_type et ON e.type_id = et.id \n" +
+                "  LEFT JOIN ${REF_PERSONS_TABLE_NAME} rp ON e.person_id = rp.id\n" +
+                "  LEFT JOIN ${REF_EQUIPMENT_STATES_TABLE_NAME} es ON e.state_id = es.id\n" +
+                "  LEFT JOIN ${REF_EQUIPMENT_TYPES_TABLE_NAME} et ON e.type_id = et.id \n" +
                 "where "
         val cond = StringBuilder()
         if (template.personId > 0) {

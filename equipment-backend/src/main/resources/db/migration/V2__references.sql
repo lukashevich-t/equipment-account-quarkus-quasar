@@ -49,3 +49,8 @@ VALUES (1, 'tim', 'CN=tim,OU=UIST,O=BTO,L=Minsk,C=BY', 'tim', 0x01, '5ee0edb9e22
 INSERT INTO `user_role`
 VALUES (1, 1),
        (1, 2);
+insert into `log` (equipment_id, action_id, user_id, comment, time)
+values (0x2CC70FEA0F0720489D59643F70FE0572, 1, 1, 'create', '2021-01-01 23:00:00'),
+       (0x2CC70FEA0F0720489D59643F70FE0572, 2, 1, 'modify', '2021-01-02 08:00:00'),
+       (0x2CC70FEA0F0720489D59643F70FE0572, 3, 1, 'service', '2021-01-04 09:00:00'),
+       (0x2CC70FEA0F0720489D59643F70FE0572, 4, 1, 'writeoff', '2022-01-01 14:15:16');

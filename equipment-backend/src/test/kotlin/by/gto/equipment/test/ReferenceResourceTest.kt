@@ -1,27 +1,34 @@
 package by.gto.equipment.test
 
+import by.gto.equipment.account.mappers.GlobalMapper
 import by.gto.equipment.account.model.BaseReference
 import by.gto.equipment.account.model.JSONResponse
 import by.gto.equipment.account.model.ReferenceAnswerJSON
-import by.gto.equipment.test.helpers.LogHelpers
+import by.gto.equipment.test.helpers.writeObjectToFile
 import by.gto.equipment.test.lifecycle.MariaDBTestResource
 import io.quarkus.test.common.QuarkusTestResource
 import io.quarkus.test.junit.QuarkusTest
-import io.restassured.RestAssured.*
+import io.restassured.RestAssured.given
 import io.restassured.common.mapper.TypeRef
 import io.restassured.response.ValidatableResponse
 import org.eclipse.microprofile.config.ConfigProvider
-import org.junit.jupiter.api.Test
-import java.util.Date
-import javax.ws.rs.core.MediaType
-import javax.ws.rs.core.Response
+import org.jboss.logging.Logger
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Order
+import org.junit.jupiter.api.Test
+import java.util.Date
+import javax.inject.Inject
+import javax.ws.rs.core.MediaType
+import javax.ws.rs.core.Response
 
 @QuarkusTest
 @QuarkusTestResource(MariaDBTestResource::class)
-class ReferenceResourceTest {
+@Order(1)
+class ReferenceResource {
+
+    private val log = Logger.getLogger(ReferenceResource::class.java)
 
     @Test
     fun logSomeInfo() {
@@ -30,7 +37,7 @@ class ReferenceResourceTest {
         for (propertyName in config.propertyNames) {
             sb.append(propertyName).append(" => ").append(config.getConfigValue(propertyName).rawValue).append("\n")
         }
-        LogHelpers.writeCharSequenceToFile(sb.append("\n\n"), "build/quarkus-test-properties.log")
+        writeObjectToFile(sb.append("\n\n"), "build/quarkus-test-properties.log", false)
     }
 
     @Test

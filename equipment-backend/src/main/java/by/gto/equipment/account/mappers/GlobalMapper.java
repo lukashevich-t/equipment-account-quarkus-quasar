@@ -17,13 +17,10 @@ import org.jetbrains.annotations.Nullable;
 
 @Mapper
 public interface GlobalMapper {
-    @Select("SELECT es.id, es.name FROM equipment_state es order by es.name")
     List<BaseReference> loadEquipmentStates();
 
-    @Select("SELECT et.id, et.name FROM equipment_type et order by et.name")
     List<BaseReference> loadEquipmentTypes();
 
-    @Select("SELECT rp.id, rp.name FROM responsible_person rp order by rp.name")
     List<BaseReference> loadResponsiblePersons();
 
     List<Equipment> loadEquipmentsByGuidList(@Param("guids") List<byte[]> guids);
@@ -67,12 +64,20 @@ public interface GlobalMapper {
     int createReference(@Param("refName") String refName, @Param("ref") BaseReference ref);
 
     /**
-     * Сохранить в БД новую запись об оборудованиии. Если запись с таким id уже есть, она будет обновлена.
+     * Сохранить в БД новую запись об оборудованиии. Если запись с таким id уже есть, будет исключение.
      *
      * @param eq описание оборудования
      * @return количество созданных записей
      */
     int saveEquipment(@NotNull @Param("eq") Equipment eq);
+
+    /**
+     * Обновить в БД запись об оборудованиии.
+     *
+     * @param eq описание оборудования
+     * @return количество обновленных записей
+     */
+    int updateEquipment(@NotNull @Param("eq") Equipment eq);
 
     /**
      * Поиск оборудования по шаблону.

@@ -1,6 +1,7 @@
 package by.gto.equipment.test.lifecycle;
 
-import by.gto.equipment.test.helpers.LogHelpers;
+import static by.gto.equipment.test.helpers.LogHelpersKt.writeObjectToFile;
+
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
 import java.util.Date;
 import java.util.HashMap;
@@ -19,7 +20,7 @@ public class MariaDBTestResource implements QuarkusTestResourceLifecycleManager 
     public Map<String, String> start() {
         try {
             StringBuilder sb = new StringBuilder("MariaDBTestResource.start ").append(new Date());
-            LogHelpers.writeCharSequenceToFile(sb.append("\n\n"), LOG_FILE_NAME);
+            writeObjectToFile(sb.append("\n\n"), LOG_FILE_NAME, true);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -62,7 +63,7 @@ public class MariaDBTestResource implements QuarkusTestResourceLifecycleManager 
                 "-B",
                 DB_NAME
             );
-            LogHelpers.writeCharSequenceToFile(execResult.getStdout(), "build/mariadb-after-tests.sql");
+            writeObjectToFile(execResult.getStdout(), "build/mariadb-after-tests.sql", false);
         } catch (Exception e) {
             e.printStackTrace();
         }
