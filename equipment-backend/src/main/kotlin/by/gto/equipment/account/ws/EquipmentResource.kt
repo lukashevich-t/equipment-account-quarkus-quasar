@@ -25,6 +25,7 @@ import javax.ws.rs.Consumes
 import javax.ws.rs.FormParam
 import javax.ws.rs.GET
 import javax.ws.rs.POST
+import javax.ws.rs.PUT
 import javax.ws.rs.Path
 import javax.ws.rs.PathParam
 import javax.ws.rs.Produces
@@ -36,7 +37,7 @@ import javax.ws.rs.core.Response
 import javax.ws.rs.core.SecurityContext
 
 @ApplicationScoped
-@Path("eq")
+@Path("equipment")
 class EquipmentResource {
     @Inject
     private lateinit var service: ServiceImpl
@@ -48,7 +49,7 @@ class EquipmentResource {
 
     // covered by test
     @GET
-    @Path("getEqDescr/{guid}")
+    @Path("description/{guid}")
     @Produces(APPLICATION_JSON)
     fun loadEquipmentDescr(@PathParam("guid") sGuid: String): Response {
         return try {
@@ -68,7 +69,7 @@ class EquipmentResource {
 
     // covered by test
     @GET
-    @Path("getEqLog/{guid}")
+    @Path("log/{guid}")
     @Produces(APPLICATION_JSON)
     fun getEquipmentLog(@PathParam("guid") sGuid: String): Response {
         return try {
@@ -83,7 +84,7 @@ class EquipmentResource {
 
     // covered by test
     @POST
-    @Path("putEqDescr")
+    @Path("description")
     @Produces(APPLICATION_JSON)
     @Consumes(APPLICATION_JSON)
     fun putEquipmentDescr(
@@ -106,8 +107,8 @@ class EquipmentResource {
     }
 
     // covered by test
-    @POST
-    @Path("updateEqDescr")
+    @PUT
+    @Path("description")
     @Produces(APPLICATION_JSON)
     @Consumes(APPLICATION_JSON)
     fun updateEquipmentDescr(

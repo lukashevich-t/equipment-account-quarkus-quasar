@@ -15,7 +15,7 @@ import javax.ws.rs.Produces
 import javax.ws.rs.core.MediaType.APPLICATION_JSON
 
 @ApplicationScoped
-@Path("r")
+@Path("reference")
 class ReferencesResource {
 
     @Inject
@@ -25,7 +25,7 @@ class ReferencesResource {
     lateinit var service: ServiceImpl
 
     @GET
-    @Path("eqStates")
+    @Path("state")
     @Produces(APPLICATION_JSON)
     fun getEquipmentStates() = try {
         val eqs = ReferenceAnswerJSON(LocalDateTime.now(), 0, service.loadEquipmentStates().values.toList())
@@ -35,7 +35,7 @@ class ReferencesResource {
     }
 
     @GET
-    @Path("eqTypes")
+    @Path("type")
     @Produces(APPLICATION_JSON)
     fun getEquipmentTypes() = try {
         val eqs = ReferenceAnswerJSON(LocalDateTime.now(), 0, service.loadEquipmentTypes().values.toList())
@@ -45,7 +45,7 @@ class ReferencesResource {
     }
 
     @GET
-    @Path("persons")
+    @Path("person")
     @Produces(APPLICATION_JSON)
     fun getResponsiblePersons() = try {
         val eqs = ReferenceAnswerJSON(LocalDateTime.now(), 0, service.loadResponsiblePersons().values.toList())

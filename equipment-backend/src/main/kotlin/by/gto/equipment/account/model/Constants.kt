@@ -18,3 +18,4 @@ const val EQUIPMENT_NOT_FOUND_BY_GUID = "не найдено оборудова�
 const val REF_PERSONS_TABLE_NAME = "responsible_person"
 const val REF_EQUIPMENT_TYPES_TABLE_NAME = "equipment_type"
 const val REF_EQUIPMENT_STATES_TABLE_NAME = "equipment_state"
+const val CONTEXT_PATH = "api"

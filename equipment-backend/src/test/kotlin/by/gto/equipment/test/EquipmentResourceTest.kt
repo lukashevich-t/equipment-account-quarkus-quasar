@@ -3,6 +3,7 @@ package by.gto.equipment.test
 import by.gto.equipment.account.helpers.toBytes
 import by.gto.equipment.account.helpers.toGuidBytes
 import by.gto.equipment.account.mappers.GlobalMapper
+import by.gto.equipment.account.model.CONTEXT_PATH
 import by.gto.equipment.account.model.DEFAULT_GUID
 import by.gto.equipment.account.model.EQUIPMENT_ALREADY_EXISTS_MESSAGE
 import by.gto.equipment.account.model.EQUIPMENT_NOT_FOUND_BY_GUID
@@ -16,6 +17,7 @@ import by.gto.equipment.account.model.REF_PERSONS_TABLE_NAME
 import by.gto.equipment.account.model.WRONG_GUID_FORMAT_MESSAGE
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.quarkus.test.junit.QuarkusTest
+import io.restassured.RestAssured
 import io.restassured.RestAssured.given
 import io.restassured.common.mapper.TypeRef
 import org.jboss.logging.Logger
@@ -24,6 +26,8 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -54,17 +58,19 @@ class EquipmentResource {
         purchaseDate = LocalDate.now()
     }
 
-    private val log = Logger.getLogger(EquipmentResource::class.java)
+    @BeforeEach
+    fun init() {
+        RestAssured.basePath = "/$CONTEXT_PATH"
+    }
 
     @Inject
     private lateinit var mapper: GlobalMapper
 
     @Test
     fun equipmentDescriptionShouldExist() {
-        log.error("testGetEqDescr")
         val refAnswer = given()
                 .pathParam("guid", EXISTING_GUID)
-                .`when`().get("eq/getEqDescr/{guid}").then()
+                .`when`().get("equipment/description/{guid}").then()
                 .statusCode(Response.Status.OK.statusCode).contentType(APPLICATION_JSON)
                 .extract().`as`(object : TypeRef<JSONResponse<EquipmentDescr>>() {})
         assertEquals(JSONResponse.CODE_OK, refAnswer.errCode)
@@ -89,10 +95,9 @@ class EquipmentResource {
 
     @Test
     fun equipmentDescriptionShouldNotExist() {
-        log.error("testGetNonExistentEqDescr")
         val refAnswer = given()
                 .pathParam("guid", NONEXISTING_GUID)
-                .`when`().get("eq/getEqDescr/{guid}").then()
+                .`when`().get("equipment/description/{guid}").then()
                 .statusCode(Response.Status.NOT_FOUND.statusCode)
                 .contentType(APPLICATION_JSON)
                 .extract().`as`(object : TypeRef<JSONResponse<EquipmentDescr?>>() {})
@@ -103,10 +108,9 @@ class EquipmentResource {
 
     @Test
     fun equipmentDescriptionWithMalformedGuidShouldFail() {
-        log.error("testEqDescrMalformedGuid")
         val refAnswer = given()
                 .pathParam("guid", MALFORMED_GUID)
-                .`when`().get("eq/getEqDescr/{guid}")
+                .`when`().get("equipment/description/{guid}")
                 .then()
                 .statusCode(Response.Status.BAD_REQUEST.statusCode)
                 .contentType(APPLICATION_JSON)
@@ -118,10 +122,9 @@ class EquipmentResource {
 
     @Test
     fun logShouldContainEntries() {
-        log.error("logTestExistingGuid")
         val answer = given()
                 .pathParam("guid", EXISTING_GUID)
-                .`when`().get("eq/getEqLog/{guid}")
+                .`when`().get("equipment/log/{guid}")
                 .then()
                 .statusCode(Response.Status.OK.statusCode)
                 .contentType(APPLICATION_JSON)
@@ -164,10 +167,9 @@ class EquipmentResource {
 
     @Test
     fun logShouldNotContainEntriesForNonexistentGuid() {
-        log.error("logTestNonExistentGuid")
         val answer = given()
                 .pathParam("guid", NONEXISTING_GUID)
-                .`when`().get("eq/getEqLog/{guid}")
+                .`when`().get("equipment/log/{guid}")
                 .then()
                 .statusCode(Response.Status.OK.statusCode)
                 .contentType(APPLICATION_JSON)
@@ -180,10 +182,9 @@ class EquipmentResource {
 
     @Test
     fun логЗавершитсяНеудачейПриСломанномGuid() {
-        log.error("logTestMalformedGuid")
         val answer = given()
                 .pathParam("guid", MALFORMED_GUID)
-                .`when`().get("eq/getEqLog/{guid}")
+                .`when`().get("equipment/log/{guid}")
                 .then()
                 .statusCode(Response.Status.BAD_REQUEST.statusCode)
                 .contentType(APPLICATION_JSON)
@@ -197,7 +198,7 @@ class EquipmentResource {
     fun сохранениеЗаписиССуществующимGUIDЗавершитсяОшибкой() {
         val newEntry = EquipmentDescr(sampleEquipmentDescr).apply { guid = EXISTING_GUID.toGuidBytes() }
         val answer = given().contentType(APPLICATION_JSON).body(newEntry)
-                .`when`().log().all().post("eq/putEqDescr")
+                .`when`().log().all().post("equipment/description")
                 .then().log().all()
                 .statusCode(Response.Status.BAD_REQUEST.statusCode)
                 .contentType(APPLICATION_JSON)
@@ -222,7 +223,7 @@ class EquipmentResource {
                 person = testCase.person
             }
             val answer = given().contentType(APPLICATION_JSON).body(newEntry)
-                    .`when`().log().all().post("eq/putEqDescr")
+                    .`when`().log().all().post("equipment/description")
                     .then().log().all()
                     .statusCode(Response.Status.CREATED.statusCode)
                     .contentType(APPLICATION_JSON)
@@ -252,7 +253,7 @@ class EquipmentResource {
             type = newEquipmentType
         }
         val answer = given().contentType(APPLICATION_JSON).body(newEntry)
-                .`when`().log().all().post("eq/updateEqDescr")
+                .`when`().log().all().put("equipment/description")
                 .then().log().all()
                 .statusCode(Response.Status.OK.statusCode)
                 .contentType(APPLICATION_JSON)
@@ -284,7 +285,7 @@ class EquipmentResource {
             person = newPerson
         }
         val answer = given().contentType(APPLICATION_JSON).body(newEntry)
-                .`when`().log().all().post("eq/updateEqDescr")
+                .`when`().log().all().put("equipment/description")
                 .then().log().all()
                 .statusCode(Response.Status.CREATED.statusCode)
                 .contentType(APPLICATION_JSON)
@@ -304,7 +305,7 @@ class EquipmentResource {
     @Test
     fun genGuid() {
         val answer = given()
-            .`when`().log().all().get("eq/guid")
+            .`when`().log().all().get("equipment/guid")
             .then().log().all()
             .statusCode(Response.Status.OK.statusCode)
             .contentType(APPLICATION_JSON)
@@ -340,5 +341,9 @@ class EquipmentResource {
         val or = om.writer()
         val result = or.writeValueAsString(obj)
         return result
+    }
+
+    companion object {
+        private val log = Logger.getLogger(EquipmentResource::class.java)
     }
 }
