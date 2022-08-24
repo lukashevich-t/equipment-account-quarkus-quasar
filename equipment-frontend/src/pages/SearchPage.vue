@@ -109,7 +109,7 @@ import { useGlobalStore } from 'stores/global-store';
 
 function useSearch() {
   let criteria = ref<Criteria>({
-    invNumber: '',
+    invNumber: 'inv1',
     personId: 0,
     stateId: 0,
     typeId: 0,
@@ -144,18 +144,15 @@ function useResultTable() {
 
 function useToolbar() {
   const searchShowing = ref(false);
-  const testValue = ref(1);
   function showHelp() {
     alert(
       'Ctrl+Shift+F для поиска\nCtrl+Shift+P для печати инвентарных номеров из буфера обмена'
     );
   }
   function openSearchDialog() {
-    console.log('openSearchDialog');
     searchShowing.value = true;
-    testValue.value = testValue.value + testValue.value;
   }
-  return { testValue, searchShowing, showHelp, openSearchDialog };
+  return  { searchShowing, showHelp, openSearchDialog };
 }
 
 const visibleColumns = [

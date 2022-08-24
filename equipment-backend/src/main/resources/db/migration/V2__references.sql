@@ -44,8 +44,8 @@ INSERT INTO `role`
 VALUES (1, 'user'),
        (2, 'odmin');
 INSERT INTO `user`
-VALUES (1, 'tim', 'CN=tim,OU=UIST,O=BTO,L=Minsk,C=BY', 'tim', 0x01, '5ee0edb9e2229c0838f1959779f1949031de0123'),
-       (2, 'kan', 'CN=kan,OU=UIST,O=BTO,L=Minsk,C=BY', 'kan', 0x01, '5ee0edb9e2229c0838f1959779f1949031de0123');
+VALUES (1, 'tim', 'CN=tim,OU=UIST,O=BTO,L=Minsk,C=BY', 'tim', 'вед.спец.', 0x01, '5ee0edb9e2229c0838f1959779f1949031de0123'),
+       (2, 'kan', 'CN=kan,OU=UIST,O=BTO,L=Minsk,C=BY', 'kan', 'зам.нач.', 0x01, '5ee0edb9e2229c0838f1959779f1949031de0123');
 INSERT INTO `user_role`
 VALUES (1, 1),
        (1, 2);

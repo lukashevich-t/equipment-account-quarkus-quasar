@@ -18,7 +18,7 @@ import by.gto.equipment.account.model.WRONG_GUID_FORMAT_MESSAGE
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.quarkus.test.junit.QuarkusTest
 import io.restassured.RestAssured
-import io.restassured.RestAssured.given
+import io.restassured.RestAssured.*
 import io.restassured.common.mapper.TypeRef
 import org.jboss.logging.Logger
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -27,12 +27,11 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import javax.inject.Inject
 import javax.ws.rs.core.MediaType.APPLICATION_JSON
 import javax.ws.rs.core.Response

@@ -17,7 +17,7 @@ import org.jboss.logging.Logger
 import java.io.ByteArrayOutputStream
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import javax.enterprise.context.ApplicationScoped
 import javax.inject.Inject
 import javax.servlet.http.HttpServletRequest
@@ -139,9 +139,9 @@ class EquipmentResource {
     fun genGuid() = JSONResponse(CODE_OK, content = UUID.randomUUID().toString())
 
     @POST
-    @Path("print_invs2")
+    @Path("print-numbers")
     @Produces("application/pdf")
-    fun printInventoryNumbers2(@FormParam("ids_for_printing") ids_for_printing: String): Response {
+    fun printInventoryNumbers(@FormParam("ids_for_printing") ids_for_printing: String): Response {
         val sGuids: List<String> = ids_for_printing.split(',').dropLastWhile { it.isEmpty() }
 
         val baos = ByteArrayOutputStream()
@@ -165,9 +165,9 @@ class EquipmentResource {
     }
 
     @GET
-    @Path("gen_inv")
+    @Path("generate-numbers")
     @Produces(WILDCARD)
-    fun getInventoryNumbers2(
+    fun generateInventoryNumbers(
         @QueryParam("date") sDate: String?,
         @QueryParam("range") sRange: String,
         @QueryParam("templateFilename") templateFilename: String?
@@ -192,7 +192,7 @@ class EquipmentResource {
     }
 
     @POST
-    @Path("searchEq")
+    @Path("search")
     @Produces(APPLICATION_JSON)
     @Consumes(APPLICATION_JSON)
     fun searchEquipment(eq: EquipmentSearchTemplate): JSONResponse<Any> =
@@ -203,7 +203,7 @@ class EquipmentResource {
         }
 
     @POST
-    @Path("addLog")
+    @Path("log-entry")
     fun addLog(@Context rq: HttpServletRequest, @Context sc: SecurityContext, logEntry: LogEntry) = try {
         // TODO: in production userId is mandatory
         val userId = service.getCachedUserInfo(rq, sc).id

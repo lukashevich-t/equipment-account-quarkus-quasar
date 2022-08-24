@@ -1,6 +1,5 @@
 package by.gto.equipment.test
 
-import by.gto.equipment.account.mappers.GlobalMapper
 import by.gto.equipment.account.model.BaseReference
 import by.gto.equipment.account.model.CONTEXT_PATH
 import by.gto.equipment.account.model.JSONResponse
@@ -10,7 +9,7 @@ import by.gto.equipment.test.lifecycle.MariaDBTestResource
 import io.quarkus.test.common.QuarkusTestResource
 import io.quarkus.test.junit.QuarkusTest
 import io.restassured.RestAssured
-import io.restassured.RestAssured.given
+import io.restassured.RestAssured.*
 import io.restassured.common.mapper.TypeRef
 import io.restassured.response.ValidatableResponse
 import org.eclipse.microprofile.config.ConfigProvider
@@ -18,12 +17,10 @@ import org.jboss.logging.Logger
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
-import java.util.Date
-import javax.inject.Inject
+import java.util.*
 import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.Response
 

@@ -21,12 +21,12 @@
               name="close"
               @click="crit.invNumber = ''"
               class="cursor-pointer"
-              v-if="criteria.inv_number"
+              v-if="criteria.invNumber"
             />
           </template>
         </q-input>
 
-        <q-input
+        <!-- <q-input
           outlined
           v-model="crit.serial"
           label="Серийник"
@@ -112,9 +112,9 @@
               v-if="criteria.type_id"
             />
           </template>
-        </q-select>
+        </q-select> -->
 
-        <q-select
+        <!-- <q-select
           outlined
           dense
           v-model="crit.stateId"
@@ -158,7 +158,7 @@
               v-if="criteria.person_id"
             />
           </template>
-        </q-select>
+        </q-select> -->
       </q-card-section>
 
       <q-card-actions align="right">
@@ -169,10 +169,11 @@
           icon="search"
           color="primary"
           @click="search"
-          :disable="!containsCriteria || $v.criteria.$invalid"
+          :disable="!containsCriteria || $v.$invalid"
         />
       </q-card-actions>
     </q-card>
+    {{ $v }}
   </div>
 </template>
 
@@ -180,12 +181,14 @@
 import {
   defineComponent,
   PropType,
-  // computed,
+  computed,
   // ref,
   toRef,
   // Ref,
 } from 'vue';
+import { required, numeric } from '@vuelidate/validators';
 import { Criteria } from 'components/models';
+import useVuelidate from '@vuelidate/core';
 
 export default defineComponent({
   name: 'SearchDlg',
@@ -196,10 +199,41 @@ export default defineComponent({
     },
   },
   setup (props) {
-    console.log(props);
+    let crit = toRef(props, 'criteria');
+
+    function clear() {
+      crit.value.invNumber = ''
+      crit.value.serial = ''
+      crit.value.displayDate = null
+      crit.value.purchaseDate = null
+      crit.value.personId = 0
+      crit.value.stateId = 0
+      crit.value.typeId = 0
+      crit.value.comment = ''
+    }
+    const containsCriteria = computed(() => {
+      for (let k in crit.value) {
+        if (crit.value[k]) {
+          return true
+        }
+      }
+      return false;
+    });
+    const validations = {
+      personId: {numeric},
+      stateId: {numeric},
+      typeId: {numeric},
+      purchaseDate: {},
+    }
+    function search() { 
+      console.log("12");
+    };
     // return { ...useClickCount(), ...useDisplayTodo(toRef(props, 'todos')) };
-    return { crit: toRef(props, 'criteria') };
-    return {};
+    return { 
+      crit, clear, search, containsCriteria,
+      $v: useVuelidate(validations, crit)
+    };
+
   },
 });
 </script>

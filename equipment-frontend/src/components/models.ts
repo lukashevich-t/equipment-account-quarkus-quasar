@@ -86,3 +86,18 @@ export interface SearchResult {
    */
   purchaseDate: Date | null;
 }
+
+/**
+ * Элемент справочника.
+ */
+export interface Reference {
+  /**
+   * id
+   */
+  id: number;
+
+  /**
+   * Название
+   */
+  name: string;
+}

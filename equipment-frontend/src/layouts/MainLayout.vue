@@ -17,7 +17,7 @@ default: lHh Lpr lFf
 
         <q-toolbar-title>Учет оборудования</q-toolbar-title>
 
-        <div>Quasar v{{ $q.version }}</div>
+        <!-- <div>Quasar v{{ $q.version }}</div> -->
       </q-toolbar>
     </q-header>
 

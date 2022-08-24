@@ -140,6 +140,7 @@ CREATE TABLE `user` (
   `name` varchar(50) NOT NULL COMMENT 'Имя пользователя (ФИО)',
   `login_cert` varchar(100) NOT NULL COMMENT 'Логин пользователя (для входа по сертификату)',
   `login` varchar(30) NOT NULL COMMENT 'Логин пользователя (для входа по логину-паролю)',
+  `position` varchar(30) NOT NULL COMMENT 'должность',
   `valid` bit(1) NOT NULL,
   `password` char(64) NOT NULL COMMENT 'пароль, закодированный в sha-1',
   PRIMARY KEY (`id`)

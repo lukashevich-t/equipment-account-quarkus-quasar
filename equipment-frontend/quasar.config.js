@@ -32,6 +32,7 @@ module.exports = configure(function (/* ctx */) {
     boot: [
       'vue3-shortkeys',
       'axios',
+      'vuelidate'
     ],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css

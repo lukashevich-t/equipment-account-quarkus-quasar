@@ -83,7 +83,7 @@ public interface GlobalMapper {
      * Поиск оборудования по шаблону.
      */
     @SelectProvider(type = SQLProviders.class, method = "searchEquipment")
-    List<EquipmentDescr> searchEquipment(@NotNull @Param("eqTemplate") EquipmentSearchTemplate template);
+    List<EquipmentDescr> searchEquipment(@NotNull EquipmentSearchTemplate template);
 
     /**
      * Загрузить информацию о пользователе по его логину
