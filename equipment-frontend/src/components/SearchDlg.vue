@@ -8,21 +8,9 @@
       </q-card-section>
 
       <q-card-section class="items-center">
-        <q-input
-          outlined
-          v-model="crit.invNumber"
-          label="Инвентарник"
-          dense
-          @keyup.enter="search"
-          ref="invNumberInput"
-        >
+        <q-input outlined v-model="crit.invNumber" label="Инвентарник" dense @keyup.enter="search" ref="invNumberInput">
           <template v-slot:append>
-            <q-icon
-              name="close"
-              @click="crit.invNumber = ''"
-              class="cursor-pointer"
-              v-if="criteria.invNumber"
-            />
+            <q-icon name="close" @click="crit.invNumber = ''" class="cursor-pointer" v-if="criteria.invNumber" />
           </template>
         </q-input>
 
@@ -158,19 +146,14 @@
               v-if="criteria.person_id"
             />
           </template>
-        </q-select> -->
+        </q-select>-->
       </q-card-section>
 
       <q-card-actions align="right">
         <!-- <q-btn flat label="test" color="primary" @click="$log.debug(criteria)"/> -->
         <q-btn flat label="Отмена" color="primary" v-close-popup />
         <q-btn flat label="Очистить" @click="clear" />
-        <q-btn
-          icon="search"
-          color="primary"
-          @click="search"
-          :disable="!containsCriteria || $v.$invalid"
-        />
+        <q-btn icon="search" color="primary" @click="search" :disable="!containsCriteria || $v.$invalid" />
       </q-card-actions>
     </q-card>
     {{ $v }}
@@ -195,45 +178,47 @@ export default defineComponent({
   props: {
     criteria: {
       type: Object as PropType<Criteria>,
-      required: true
+      required: true,
     },
   },
-  setup (props) {
+  setup(props) {
     let crit = toRef(props, 'criteria');
 
     function clear() {
-      crit.value.invNumber = ''
-      crit.value.serial = ''
-      crit.value.displayDate = null
-      crit.value.purchaseDate = null
-      crit.value.personId = 0
-      crit.value.stateId = 0
-      crit.value.typeId = 0
-      crit.value.comment = ''
+      crit.value.invNumber = '';
+      crit.value.serial = '';
+      crit.value.displayDate = null;
+      crit.value.purchaseDate = null;
+      crit.value.personId = 0;
+      crit.value.stateId = 0;
+      crit.value.typeId = 0;
+      crit.value.comment = '';
     }
     const containsCriteria = computed(() => {
       for (let k in crit.value) {
         if (crit.value[k]) {
-          return true
+          return true;
         }
       }
       return false;
     });
     const validations = {
-      personId: {numeric},
-      stateId: {numeric},
-      typeId: {numeric},
+      personId: { numeric },
+      stateId: { numeric },
+      typeId: { numeric },
       purchaseDate: {},
+    };
+    function search() {
+      console.log('12');
     }
-    function search() { 
-      console.log("12");
-    };
     // return { ...useClickCount(), ...useDisplayTodo(toRef(props, 'todos')) };
-    return { 
-      crit, clear, search, containsCriteria,
-      $v: useVuelidate(validations, crit)
+    return {
+      crit,
+      clear,
+      search,
+      containsCriteria,
+      $v: useVuelidate(validations, crit),
     };
-
   },
 });
 </script>
