@@ -1,3 +1,7 @@
+const OFF = 0
+const WARN = 1
+const on = 2
+
 module.exports = {
   // https://eslint.org/docs/user-guide/configuring#configuration-cascading-and-hierarchy
   // This option interrupts the configuration hierarchy at this file
@@ -82,7 +86,7 @@ module.exports = {
 
     // The core 'no-unused-vars' rules (in the eslint:recommended ruleset)
     // does not work with type definitions
-    'no-unused-vars': 'on',
+    'no-unused-vars': WARN,
 
     // allow debugger during development only
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off'

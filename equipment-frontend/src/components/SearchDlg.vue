@@ -8,13 +8,24 @@
       </q-card-section>
 
       <q-card-section class="items-center">
-        <q-input outlined v-model="crit.invNumber" label="Инвентарник" dense @keyup.enter="search" ref="invNumberInput">
+        <q-input
+          outlined
+          v-model="crit.invNumber"
+          label="Инвентарник"
+          dense
+          @keyup.enter="search"
+        >
           <template v-slot:append>
-            <q-icon name="close" @click="crit.invNumber = ''" class="cursor-pointer" v-if="criteria.invNumber" />
+            <q-icon
+              name="close"
+              @click="crit.invNumber = ''"
+              class="cursor-pointer"
+              v-if="criteria.invNumber"
+            />
           </template>
         </q-input>
 
-        <!-- <q-input
+        <q-input
           outlined
           v-model="crit.serial"
           label="Серийник"
@@ -48,7 +59,7 @@
           </template>
         </q-input>
 
-        <q-input
+        <!-- <q-input
           outlined
           v-model="crit.displayDate"
           label="Дата покупки"
@@ -70,7 +81,37 @@
               >
                 <q-date
                   v-model="crit.displayDate"
-                  @input="() => $refs.qDateProxy.hide()"
+                  @input="() => qDateProxy.hide()"
+                  mask="DD.MM.YYYY"
+                  :locale="locale"
+                />
+              </q-popup-proxy>
+            </q-icon>
+          </template>
+        </q-input> -->
+
+        <q-input
+          outlined
+          v-model="crit.purchaseDate"
+          label="Дата покупки"
+          dense
+          @keyup.enter="search"
+        >
+          <template v-slot:append>
+            <q-icon
+              name="close"
+              @click="crit.purchaseDate = ''"
+              class="cursor-pointer"
+              v-if="criteria.purchaseDate"
+            />
+            <q-icon name="event" class="cursor-pointer">
+              <q-popup-proxy
+                cover
+                transition-show="scale"
+                transition-hide="scale"
+              >
+                <q-date
+                  v-model="crit.purchaseDate"
                   mask="DD.MM.YYYY"
                   :locale="locale"
                 />
@@ -91,16 +132,18 @@
           use-input
           @filter="filterTypes"
           label="Тип"
+          option-value="id"
+          option-label="name"
         >
           <template v-slot:append>
             <q-icon
               name="close"
               @click="crit.typeId = 0"
               class="cursor-pointer"
-              v-if="criteria.type_id"
+              v-if="criteria.typeId"
             />
           </template>
-        </q-select> -->
+        </q-select>
 
         <!-- <q-select
           outlined
@@ -153,10 +196,15 @@
         <!-- <q-btn flat label="test" color="primary" @click="$log.debug(criteria)"/> -->
         <q-btn flat label="Отмена" color="primary" v-close-popup />
         <q-btn flat label="Очистить" @click="clear" />
-        <q-btn icon="search" color="primary" @click="search" :disable="!containsCriteria || $v.$invalid" />
+        <q-btn
+          icon="search"
+          color="primary"
+          @click="search"
+          :disable="!containsCriteria || v$.$invalid"
+        />
       </q-card-actions>
     </q-card>
-    {{ $v }}
+    {{ crit }}
   </div>
 </template>
 
@@ -165,13 +213,46 @@ import {
   defineComponent,
   PropType,
   computed,
-  // ref,
+  ref,
   toRef,
   // Ref,
 } from 'vue';
-import { required, numeric } from '@vuelidate/validators';
+import { numeric } from '@vuelidate/validators';
 import { Criteria } from 'components/models';
 import useVuelidate from '@vuelidate/core';
+import { locale } from 'src/lib/consts';
+import { useGlobalStore } from 'src/stores/global-store';
+
+function useTypes() {
+  const store = useGlobalStore();
+  const typesFiltered = ref(store.types);
+  function filterTypes(val: string, update): void {
+    if (val === '') {
+      update(() => {
+        typesFiltered.value = store.types;
+        // here you have access to "ref" which
+        // is the Vue reference of the QSelect
+      });
+      return;
+    }
+
+    update(() => {
+      const needle = val.toLowerCase();
+      typesFiltered.value = store.types.filter(
+        (v) => v.name.toLowerCase().indexOf(needle) > -1
+      );
+    });
+  }
+  return { filterTypes, typesFiltered };
+}
+
+function useReference(name: string) {
+  debugger;
+  const store = useGlobalStore();
+  console.log(store[name]);
+ 
+  return {  };
+}
 
 export default defineComponent({
   name: 'SearchDlg',
@@ -213,11 +294,14 @@ export default defineComponent({
     }
     // return { ...useClickCount(), ...useDisplayTodo(toRef(props, 'todos')) };
     return {
+      ...useTypes(),
+      ...useReference('states'),
+      locale,
       crit,
       clear,
       search,
       containsCriteria,
-      $v: useVuelidate(validations, crit),
+      v$: useVuelidate(validations, crit),
     };
   },
 });

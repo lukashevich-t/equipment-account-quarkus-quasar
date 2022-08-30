@@ -38,11 +38,11 @@ export interface Criteria {
   /**
    * Дата покупки
    */
-  purchaseDate: Date | null;
+  purchaseDate: string | null;
   /**
    * ???
    */
-  displayDate: Date | null;
+  displayDate: string | null;
 }
 
 /**
